@@ -1,6 +1,6 @@
 # TAD LISTA
 
-def createList():
+def createList() -> list:
     #Crea una list vacia
     list=[]
     return list
@@ -34,7 +34,7 @@ def isEmpty(list):
     #Retorna Verdadero si la list no tiene elementos
     return len(list)==0
 
-def size(list):
+def size(list) -> int:
     #Retorna la cantidad de elementos de la list
     return len(list)
 

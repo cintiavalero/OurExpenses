@@ -24,9 +24,9 @@ def tituloConsola(titulo):
 #-------------------------------------------------------------------------------------------------------
 # funcion handler
 def handler(signum, frame):
-    print("\nCtrl-C detectado. Finalizando la ejecucion...")
-    time.sleep(2)
-    exit(1)
+    print("\nCtrl-C detectado. Finalizando la ejecucion...\n")
+    time.sleep(0.2)
+    exit()
 # llamo a la funcion handler
 def callHandler(): signal.signal(signal.SIGINT, handler)
 #-------------------------------------------------------------------------------------------------------
