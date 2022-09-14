@@ -27,6 +27,17 @@ def altaPersona(cant: int):
         addToList(personas, persona)
         aux += 1
 
+def bajaPersona():
+    clear()
+    setTittle(" >>> BAJA DE PERSONAS >>> ", "=")
+    print("Personas actuales:", personas)
+    nombre = str(input("Ingrese el nombre de la persona a dar de baja: "))
+    for persona in personas:
+        if nombre == persona.getNombre():
+                removeElemList(personas, persona)
+                print("Persona eliminada correctamente")
+    input()
+
 def desasignarPersona():
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
@@ -42,6 +53,7 @@ def desasignarPersona():
             for p in articulo.getPersonas():
                 if personaAeliminar == p.getNombre():
                     articulo.getPersonas().remove(p)
+                    print("Persona/s desasignada/s correctamente")
                     # tambien se puede negar la condicion del if y cargar una lista nueva que luego se carga al objeto
 
             #articulo.desasignar(personaAeliminar)
@@ -67,7 +79,7 @@ def altaArticulos():
     for persona in personas:
         nombres.append(persona.getNombre())
     print("Opciones:", nombres)
-    nom = input("--->")
+    nom = input("---> ")
     vec = nom.split(",")
     for persona in personas:    # itero lista personas
         for nomb in vec:        # itero los nombres del vector
@@ -89,12 +101,18 @@ def verFactura():
     
     for detalle in factura.getDetalles():           # itero la coleccion de detalles
         articulo = detalle.getArticulo()            # recupero un articulo
+        subtotal = detalle.calcularSubTotal()       # subtotal del detalle
         print(" Articulo:", articulo.getNombre(),   
         "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
-        "    Divisores:", articulo.getPersonas())   # imprimo los datos del articulo y del detalle.
-    
+        "    Divisores:", articulo.getPersonas(),
+        "    Subtotal: $", subtotal,
+        "    Cada uno paga: $", round(subtotal/size(articulo.getPersonas()), 2))   # imprimo los datos del articulo y del detalle.
+
     input()
 
+def calcular():
+    for detalle in factura.getDetalles():
+        detalle.calcularSubTotal()
 
 
 def menu():
@@ -103,8 +121,9 @@ def menu():
     print("1) Cargar Articulo.")
     print("2) Desasignar persona de Articulo.")
     print("3) Ver factura.")
+    print("4) Baja persona.")
     print("5) Cargar Persona.")
-    print("0) Salir")
+    print("0) Salir.")
     res = int(input("---> "))
     return res
 
@@ -127,7 +146,7 @@ if __name__ == '__main__':
             c = int(input("Cuantas personas va a ingresar?: "))
             altaPersona(c)
         elif op == 4:
-            pass
+            bajaPersona()
 
 
 
