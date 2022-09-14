@@ -7,6 +7,7 @@ FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
 callHandler()                                       # handler: Ctrl+C
 personas = createList()                             # creo coleccion de personas
+divisores = createList()
 #tickets = createList()                             # creo coleccion de tickets
 factura = Factura(FECHA,1,0)                        # creo la factura principal
 clear()                                             # limpio pantalla
@@ -18,7 +19,8 @@ def altaPersona(cant: int):
     while aux < cant:
         # Se establecen los datos del objeto
         nombre = str(input("Nombre: "))
-        inversion = float(input("Inversion inicial: $"))
+        #inversion = float(input("Inversion inicial: $"))
+        inversion = float(codNumRand(3))
         diferencia = 0.00
         # Se crea un objeto 'Persona' con los datos anteriores
         persona = Persona(nombre, inversion, diferencia)
@@ -29,18 +31,25 @@ def altaPersona(cant: int):
 def desasignarPersona():
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
+    nombres = []
+    for persona in personas:
+        nombres.append(persona.getNombre())
+    print("Articulos:", nombres)
     nombreArticulo = str(input("Ingrese el nombre del articulo: "))
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
     for detalle in factura.getDetalles():       # itero la coleccion de detalles
         articulo = detalle.getArticulo()        # recupero un articulo
-        if nombreArticulo == articulo.getNombre():
+        if nombreArticulo == articulo.getNombre(): # si nomArticulo = a algun nombre de articulo:
             print("Articulo encontrado:", articulo.getNombre())
             print("Que usuario se debe eliminar?:", articulo.getPersonas())
             personaAeliminar=str(input("---> "))
-            for p in articulo.getPersonas():
-                if personaAeliminar == p.getNombre():
-                    articulo.getPersonas().remove(p)
+
+            for divisor in articulo.getPersonas():
+                if divisor.getNombre() == personaAeliminar:
+                    articulo.getPersonas().remove(divisor)
+
+            
 
             #articulo.desasignar(personaAeliminar)
             #print(articulo.getPersonas())
@@ -53,14 +62,31 @@ def desasignarPersona():
 def altaArticulos():
     clear()
     setTittle(" CARGA DE ARTICULOS ", "=")
-    nombre = str(input("Nombre: "))
-    precio = float(input("Precio: $"))
-    cantidad = int(input("Cantidad: "))
-    # Creo un articulo con nombre y personas asociadas
-    articulo = Articulo(nombre, personas)   # probar añadir uno por uno
+    nombreArticulo = str(input("Nombre: "))
+    #precio = float(input("Precio: $"))
+    precio = float(codNumRand(3))
+    #cantidad = int(input("Cantidad: "))
+    cantidad = int(codNumRand(1))
+
+    print("Que personas dividiran el gasto?")
+    nombres = []
+    clearList(divisores)
+    for persona in personas:
+        nombres.append(persona.getNombre())
+    print("Opciones:", nombres)
+    nom = input("--->")
+    vec = nom.split(",")
+    for persona in personas:    # itero lista personas
+        for i in vec:        # itero los nombres del vector
+            if i == persona.getNombre():
+                addToList(divisores, persona)
+    
+    # Creo un articulo con nombre y divisores asociados
+    articulo = Articulo(nombreArticulo, divisores)
     # Creo un detalle con un articulo asociado
     detalle = FacturaDetalle(cantidad, precio, articulo)
     factura.addDetalle(detalle)
+    clearList(divisores)
 
 def verFactura():
     clear()
@@ -70,9 +96,12 @@ def verFactura():
     
     for detalle in factura.getDetalles():           # itero la coleccion de detalles
         articulo = detalle.getArticulo()            # recupero un articulo
+        nombres=[]
+        for i in articulo.getPersonas():
+            nombres.append(i.getNombre())
         print(" Articulo:", articulo.getNombre(),   
         "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
-        "    Divisores:", articulo.getPersonas())   # imprimo los datos del articulo y del detalle.
+        "    Divisores:", nombres)   # imprimo los datos del articulo y del detalle.
     
     input()
 
