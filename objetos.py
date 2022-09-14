@@ -1,7 +1,5 @@
 from datetime import datetime
 
-# cambiar lista e personas a obj detalle y precio a obj articulo
-
 class Persona():
     # Inicializo la clase Persona
     def __init__(self, nombre: str, inversion: float, diferencia: float):
@@ -51,11 +49,6 @@ class Articulo():
         return texto.format(self.nombre, self.personas)
     def getPersonas(self) -> list[Persona]:
         return self.personas
-    def getNomPersonas(self):
-        nombres=[]
-        for persona in self.personas:
-            nombres.append(persona.getNombre())
-        return nombres
     def getNombre(self) -> str:
         return self.nombre
     def setNombre(self, nNombre: str):

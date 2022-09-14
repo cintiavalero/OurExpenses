@@ -7,7 +7,6 @@ FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
 callHandler()                                       # handler: Ctrl+C
 personas = createList()                             # creo coleccion de personas
-divisores = createList()
 #tickets = createList()                             # creo coleccion de tickets
 factura = Factura(FECHA,1,0)                        # creo la factura principal
 clear()                                             # limpio pantalla
@@ -31,25 +30,19 @@ def altaPersona(cant: int):
 def desasignarPersona():
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
-    nombres = []
-    for persona in personas:
-        nombres.append(persona.getNombre())
-    print("Articulos:", nombres)
     nombreArticulo = str(input("Ingrese el nombre del articulo: "))
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
     for detalle in factura.getDetalles():       # itero la coleccion de detalles
         articulo = detalle.getArticulo()        # recupero un articulo
-        if nombreArticulo == articulo.getNombre(): # si nomArticulo = a algun nombre de articulo:
+        if nombreArticulo == articulo.getNombre():
             print("Articulo encontrado:", articulo.getNombre())
             print("Que usuario se debe eliminar?:", articulo.getPersonas())
             personaAeliminar=str(input("---> "))
-
-            for divisor in articulo.getPersonas():
-                if divisor.getNombre() == personaAeliminar:
-                    articulo.getPersonas().remove(divisor)
-
-            
+            for p in articulo.getPersonas():
+                if personaAeliminar == p.getNombre():
+                    articulo.getPersonas().remove(p)
+                    # tambien se puede negar la condicion del if y cargar una lista nueva que luego se carga al objeto
 
             #articulo.desasignar(personaAeliminar)
             #print(articulo.getPersonas())
@@ -70,23 +63,23 @@ def altaArticulos():
 
     print("Que personas dividiran el gasto?")
     nombres = []
-    clearList(divisores)
+    divisores = createList()
     for persona in personas:
         nombres.append(persona.getNombre())
     print("Opciones:", nombres)
     nom = input("--->")
     vec = nom.split(",")
     for persona in personas:    # itero lista personas
-        for i in vec:        # itero los nombres del vector
-            if i == persona.getNombre():
+        for nomb in vec:        # itero los nombres del vector
+            if nomb == persona.getNombre():
                 addToList(divisores, persona)
     
-    # Creo un articulo con nombre y divisores asociados
+    # Creo un articulo con nombre y personas asociadas
     articulo = Articulo(nombreArticulo, divisores)
+    
     # Creo un detalle con un articulo asociado
     detalle = FacturaDetalle(cantidad, precio, articulo)
     factura.addDetalle(detalle)
-    clearList(divisores)
 
 def verFactura():
     clear()
@@ -96,12 +89,9 @@ def verFactura():
     
     for detalle in factura.getDetalles():           # itero la coleccion de detalles
         articulo = detalle.getArticulo()            # recupero un articulo
-        nombres=[]
-        for i in articulo.getPersonas():
-            nombres.append(i.getNombre())
         print(" Articulo:", articulo.getNombre(),   
         "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
-        "    Divisores:", nombres)   # imprimo los datos del articulo y del detalle.
+        "    Divisores:", articulo.getPersonas())   # imprimo los datos del articulo y del detalle.
     
     input()
 
