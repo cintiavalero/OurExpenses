@@ -1,7 +1,7 @@
-import utilities, TAD_LISTA, objetos
 from utilities import *
 from TAD_LISTA import *
-from objetos import *
+from Object import *
+
 ########## ATRIBUTOS GLOBALES ##########
 FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
@@ -18,11 +18,8 @@ def altaPersona(cant: int):
     while aux < cant:
         # Se establecen los datos del objeto
         nombre = str(input("Nombre: "))
-        #inversion = float(input("Inversion inicial: $"))
-        inversion = float(codNumRand(3))
-        diferencia = 0.00
         # Se crea un objeto 'Persona' con los datos anteriores
-        persona = Persona(nombre, inversion, diferencia)
+        persona = Persona(nombre)
         # Se agrega el objeto en la coleccion de personas
         addToList(personas, persona)
         aux += 1
@@ -41,6 +38,7 @@ def bajaPersona():
 def desasignarPersona():
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
+    print("Articulos:",factura.getDetalles())
     nombreArticulo = str(input("Ingrese el nombre del articulo: "))
     clear()
     setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
@@ -90,7 +88,7 @@ def altaArticulos():
     articulo = Articulo(nombreArticulo, divisores)
     
     # Creo un detalle con un articulo asociado
-    detalle = FacturaDetalle(cantidad, precio, articulo)
+    detalle = FacturaDetalle(articulo, cantidad, precio)
     factura.addDetalle(detalle)
 
 def verFactura():
@@ -109,11 +107,6 @@ def verFactura():
         "    Cada uno paga: $", round(subtotal/size(articulo.getPersonas()), 2))   # imprimo los datos del articulo y del detalle.
 
     input()
-
-def calcular():
-    for detalle in factura.getDetalles():
-        detalle.calcularSubTotal()
-
 
 def menu():
     clear()

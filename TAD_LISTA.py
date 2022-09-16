@@ -1,7 +1,4 @@
-# TAD LISTA
-
-from objetos import Persona
-
+from Object import Persona
 
 def createList() -> list[Persona]:
     #Crea una list vacia
