@@ -1,4 +1,4 @@
-from Object import FacturaDetalle
+from Object import FacturaDetalle, Articulo
 from datetime import datetime
 
 class Factura:
@@ -21,6 +21,21 @@ class Factura:
         return self.importeTotal
     def getDetalles(self) -> list[FacturaDetalle]:
         return self.detalles
+    def getArticulos(self) -> list[Articulo]: # Retorna una lista de Articulos
+        listaArticulos = []
+        for detalle in self.getDetalles():
+            articulo = detalle.getArticulo()
+            listaArticulos.append(articulo)
+        return listaArticulos
+    def getNomArticulos(self) -> list[str]: # Retorna una lista con los nombres de los Articulos
+        listaArticulos = []
+        for detalle in self.getDetalles():
+            articulo = detalle.getArticulo().getNombre()
+            listaArticulos.append(articulo)
+        return listaArticulos
+
+
+    
     def setFecha(self, nFecha: datetime):
         self.fecha = nFecha
     def setNumero(self, nNumero: int):
@@ -31,3 +46,5 @@ class Factura:
         self.detalles = nDetalle
     def addDetalle(self, nDetalle: FacturaDetalle):
         self.detalles.append(nDetalle)
+    def delDetalle(self, rDetalle: FacturaDetalle):
+        self.detalles.remove(rDetalle)

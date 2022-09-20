@@ -7,10 +7,12 @@ FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
 callHandler()                                       # handler: Ctrl+C
 personas = createList()                             # creo coleccion de personas
+burbujas = []                             # creo una 'burnuja' que contiene listas de divisores.
 #tickets = createList()                             # creo coleccion de tickets
 factura = Factura(FECHA,1,0)                        # creo la factura principal
 clear()                                             # limpio pantalla
 ########################################
+################ Persona ################
 def altaPersona(cant: int):
     clear()
     setTittle(" >>> CARGA DE PERSONAS >>> ", "=")
@@ -18,12 +20,12 @@ def altaPersona(cant: int):
     while aux < cant:
         # Se establecen los datos del objeto
         nombre = str(input("Nombre: "))
+        facturaPersonal = Factura(FECHA, codNumRand(2), 0)
         # Se crea un objeto 'Persona' con los datos anteriores
-        persona = Persona(nombre)
+        persona = Persona(nombre, facturaPersonal)
         # Se agrega el objeto en la coleccion de personas
         addToList(personas, persona)
         aux += 1
-
 def bajaPersona():
     clear()
     setTittle(" >>> BAJA DE PERSONAS >>> ", "=")
@@ -35,34 +37,25 @@ def bajaPersona():
                 print("Persona eliminada correctamente")
     input()
 
-def desasignarPersona():
-    clear()
-    setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
-    print("Articulos:",factura.getDetalles())
-    nombreArticulo = str(input("Ingrese el nombre del articulo: "))
-    clear()
-    setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
-    for detalle in factura.getDetalles():       # itero la coleccion de detalles
-        articulo = detalle.getArticulo()        # recupero un articulo
-        if nombreArticulo == articulo.getNombre():
-            print("Articulo encontrado:", articulo.getNombre())
-            print("Que usuario se debe eliminar?:", articulo.getPersonas())
-            personaAeliminar=str(input("---> "))
-            for p in articulo.getPersonas():
-                if personaAeliminar == p.getNombre():
-                    articulo.getPersonas().remove(p)
-                    print("Persona/s desasignada/s correctamente")
-                    # tambien se puede negar la condicion del if y cargar una lista nueva que luego se carga al objeto
+################ Divisores ################
 
-            #articulo.desasignar(personaAeliminar)
-            #print(articulo.getPersonas())
+def permutacion():
+    for persona in personas: #itero lista personas
+        facturaPersonal = persona.getFacturaPersonal()
+        for detalle in factura.getDetalles(): # itero los detalles de la factura general
+            for nomPersona in detalle.getNomPersonas():        #itero los nombres de los detalles
+                if nomPersona == persona.getNombre():   # si uno coincide con nomPersona, añado el detalle
+                    facturaPersonal.addDetalle(detalle)
+                    
+        print(persona.getFacturaPersonal())
 
-        #for persona in articulo.getPersonas():  # itero dentro de la coleccion de personas
-        #    if nom == persona.getNombre():      # busco si 'nom' coincide con el nombre de la persona
-        #        pass
-    input()
-
-def altaArticulos():
+def verTodasFacturas():
+    for persona in personas:
+        factura = persona.getFacturaPersonal()
+        verFactura(factura)
+    
+################ Articulo ################
+def altaArticulo():
     clear()
     setTittle(" CARGA DE ARTICULOS ", "=")
     nombreArticulo = str(input("Nombre: "))
@@ -72,11 +65,9 @@ def altaArticulos():
     cantidad = int(codNumRand(1))
 
     print("Que personas dividiran el gasto?")
-    nombres = []
     divisores = createList()
-    for persona in personas:
-        nombres.append(persona.getNombre())
-    print("Opciones:", nombres)
+    nombre = Persona.getNomPersonas(personas)
+    print("Opciones:", nombre)
     nom = input("---> ")
     vec = nom.split(",")
     for persona in personas:    # itero lista personas
@@ -91,31 +82,69 @@ def altaArticulos():
     detalle = FacturaDetalle(articulo, cantidad, precio)
     factura.addDetalle(detalle)
 
-def verFactura():
+def bajaArticulo():
+    clear()
+    aux = 0
+    setTittle(" >>> BAJA DE ARTICULO >>> ", "=")
+    print("Articulos actuales:", factura.getNomArticulos())
+    nombreArticulo = str(input("Articulo a eliminar: "))
+    for detalle in factura.getDetalles():
+        if nombreArticulo == detalle.getArticulo().getNombre():
+            factura.delDetalle(detalle)
+            print("Articulo eliminado correctamente!"); aux = 1
+    if aux == 0: print("Atencion! No se ha encontrado el articulo ingresado.") 
+    input()
+
+def desasignarPersona():
+    clear()
+    setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
+    print("Articulos:", factura.getNomArticulos())
+    nombreArticulo = str(input("Ingrese el nombre del articulo: "))
+    clear()
+    setTittle(" >>> DESASIGNAR PERSONA >>> ", "=")
+    for detalle in factura.getDetalles():       # itero la coleccion de detalles
+        articulo = detalle.getArticulo()        # recupero un articulo
+        if nombreArticulo == articulo.getNombre():
+            print("Articulo encontrado:", articulo.getNombre())
+            print("Que usuario se debe eliminar?:", articulo.getPersonas())
+            personaAeliminar=str(input("---> "))
+            for persona in articulo.getPersonas():
+                if personaAeliminar == persona.getNombre():
+                    articulo.getPersonas().remove(persona)
+                    print("Persona/s desasignada/s correctamente")
+                    # tambien se puede negar la condicion del if y cargar una lista nueva que luego se carga al objeto.
+    input()
+################ Factura ################
+def verFactura(factura: Factura):
     clear()
     setTittle(" >>> GENERAR FACTURA >>> ", "=")
     print("Factura nro:", factura.getNumero(), "    Fecha:", factura.getFecha())
     print("Detalle:")
-    
-    for detalle in factura.getDetalles():           # itero la coleccion de detalles
-        articulo = detalle.getArticulo()            # recupero un articulo
-        subtotal = detalle.calcularSubTotal()       # subtotal del detalle
-        print(" Articulo:", articulo.getNombre(),   
-        "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
-        "    Divisores:", articulo.getPersonas(),
-        "    Subtotal: $", subtotal,
-        "    Cada uno paga: $", round(subtotal/size(articulo.getPersonas()), 2))   # imprimo los datos del articulo y del detalle.
-
+    if isEmpty(factura.getDetalles()):
+        print("Atencion! Todavia no hay detalles cargados en la factura")
+    else:
+        for detalle in factura.getDetalles():           # itero la coleccion de detalles
+            articulo = detalle.getArticulo()            # recupero un articulo
+            subtotal = detalle.calcularSubTotal()       # subtotal del detalle
+            print(" Articulo:", articulo.getNombre(),   
+            "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
+            "    Divisores:", articulo.getPersonas(),
+            "    Subtotal: $", subtotal,
+            "    Cada uno paga: $", detalle.calcularSubTotalxPersona())   # imprimo los datos del articulo y del detalle.
     input()
 
+
+
+########################################
 def menu():
     clear()
     setTittle(" >>> MENU DE OPCIONES >>> ", "=")
-    print("1) Cargar Articulo.")
-    print("2) Desasignar persona de Articulo.")
-    print("3) Ver factura.")
-    print("4) Baja persona.")
-    print("5) Cargar Persona.")
+    print("1) Alta Articulo.")
+    print("2) Baja Articulo.")
+    print("3) Desasignar persona de Articulo.")
+    print("4) Ver factura.")
+    print("5) Alta Persona.")
+    print("6) Baja Persona.")
     print("0) Salir.")
     res = int(input("---> "))
     return res
@@ -129,17 +158,22 @@ if __name__ == '__main__':
                 print("\nAtencion! No hay personas para asignarle a los articulos.")
                 input()
             else:                   # si la lista de personas no esta vacia:
-                altaArticulos()     # permito ingresar los articulos
+                altaArticulo()      # permito ingresar los articulos
         elif op == 2:
-            desasignarPersona()
+            bajaArticulo()
         elif op == 3:
-            verFactura()
+            desasignarPersona()
+        elif op == 4:
+            verFactura(factura)
         elif op == 5:
             clear()
             c = int(input("Cuantas personas va a ingresar?: "))
             altaPersona(c)
-        elif op == 4:
+        elif op == 6:
             bajaPersona()
+        elif op == 7:
+            verTodasFacturas()
+        
 
 
 
