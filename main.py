@@ -1,12 +1,14 @@
 from utilities import *
 from TAD_LISTA import *
 from Object import *
+#import pickel
 
 ########## ATRIBUTOS GLOBALES ##########
 FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
 callHandler()                                       # handler: Ctrl+C
-personas = createList()                             # creo coleccion de personas
+global personas
+personas = createList()                          # creo coleccion de personas
 burbujas = []                             # creo una 'burnuja' que contiene listas de divisores.
 #tickets = createList()                             # creo coleccion de tickets
 factura = Factura(FECHA,1,0)                        # creo la factura principal
@@ -38,17 +40,23 @@ def bajaPersona():
     input()
 
 ################ Divisores ################
-
 def permutacion():
+    listaNombres = []
+    for persona in personas:
+        nombre = persona.getNombre()
+        listaNombres.append(nombre)
+    #listaNombres=[persona.getNombre() for persona in personas]
+    #[persona.getNombre() for persona in personas if (persona.getNombre() != 'Pedro')]
     for persona in personas: #itero lista personas
         facturaPersonal = persona.getFacturaPersonal()
         for detalle in factura.getDetalles(): # itero los detalles de la factura general
-            for nomPersona in detalle.getNomPersonas():        #itero los nombres de los detalles
+            listaNombres=[persona.getNombre() for persona in detalle.getArticulo().getPersonas()]
+            for nomPersona in listaNombres:        #itero los nombres de los detalles
                 if nomPersona == persona.getNombre():   # si uno coincide con nomPersona, añado el detalle
+                    print("Detalle:", detalle)
                     facturaPersonal.addDetalle(detalle)
                     
         print(persona.getFacturaPersonal())
-
 def verTodasFacturas():
     for persona in personas:
         factura = persona.getFacturaPersonal()
@@ -66,8 +74,12 @@ def altaArticulo():
 
     print("Que personas dividiran el gasto?")
     divisores = createList()
-    nombre = Persona.getNomPersonas(personas)
-    print("Opciones:", nombre)
+    listaNombres = []
+    for persona in personas:
+        nombre = persona.getNombre()
+        listaNombres.append(nombre)
+    #nombre = Persona.getNomPersonas(personas)
+    print("Opciones:", listaNombres)
     nom = input("---> ")
     vec = nom.split(",")
     for persona in personas:    # itero lista personas
@@ -172,6 +184,7 @@ if __name__ == '__main__':
         elif op == 6:
             bajaPersona()
         elif op == 7:
+            permutacion()
             verTodasFacturas()
         
 

@@ -16,7 +16,7 @@ class Persona:
         return self.nombre
     def getFacturaPersonal(self) -> Factura:
         return self.facturaPersonal
-    def getNomPersonas(personas: list[Persona]) -> list[str]:
+    def getNomPersonas(self, personas: list[Persona]) -> list[str]:
         listaNombres = []
         for persona in personas:
             nombre = persona.getNombre()
