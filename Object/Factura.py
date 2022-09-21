@@ -42,8 +42,8 @@ class Factura:
         self.numero = nNumero
     def setImporteTotal(self, nImporteTotal: float):
         self.importeTotal = nImporteTotal
-    def setDetalle(self, nDetalle: FacturaDetalle):
-        self.detalles = nDetalle
+    def setDetalles(self, nDetalles: FacturaDetalle):
+        self.detalles = nDetalles
     def addDetalle(self, nDetalle: FacturaDetalle):
         self.detalles.append(nDetalle)
     def delDetalle(self, rDetalle: FacturaDetalle):

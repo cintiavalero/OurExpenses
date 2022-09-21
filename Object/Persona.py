@@ -1,4 +1,4 @@
-from Object import Persona, Factura, FacturaDetalle
+from Object import Factura, FacturaDetalle
 class Persona:
     # Inicializo la clase Persona
     def __init__(self, nombre: str, facturaPersonal: Factura):
@@ -16,12 +16,6 @@ class Persona:
         return self.nombre
     def getFacturaPersonal(self) -> Factura:
         return self.facturaPersonal
-    def getNomPersonas(self, personas: list[Persona]) -> list[str]:
-        listaNombres = []
-        for persona in personas:
-            nombre = persona.getNombre()
-            listaNombres.append(nombre)
-        return listaNombres
     
     def addDetalle(self, nDetalle: FacturaDetalle):
         self.facturaPersonal.addDetalle(nDetalle)

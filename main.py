@@ -7,9 +7,7 @@ from Object import *
 FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
 callHandler()                                       # handler: Ctrl+C
-global personas
-personas = createList()                          # creo coleccion de personas
-burbujas = []                             # creo una 'burnuja' que contiene listas de divisores.
+personas = createList()                             # creo coleccion de personas
 #tickets = createList()                             # creo coleccion de tickets
 factura = Factura(FECHA,1,0)                        # creo la factura principal
 clear()                                             # limpio pantalla
@@ -41,52 +39,41 @@ def bajaPersona():
 
 ################ Divisores ################
 def permutacion():
-    listaNombres = []
-    for persona in personas:
-        nombre = persona.getNombre()
-        listaNombres.append(nombre)
     #listaNombres=[persona.getNombre() for persona in personas]
     #[persona.getNombre() for persona in personas if (persona.getNombre() != 'Pedro')]
+    
     for persona in personas: #itero lista personas
         facturaPersonal = persona.getFacturaPersonal()
         for detalle in factura.getDetalles(): # itero los detalles de la factura general
             listaNombres=[persona.getNombre() for persona in detalle.getArticulo().getPersonas()]
             for nomPersona in listaNombres:        #itero los nombres de los detalles
                 if nomPersona == persona.getNombre():   # si uno coincide con nomPersona, añado el detalle
-                    print("Detalle:", detalle)
                     facturaPersonal.addDetalle(detalle)
-                    
-        print(persona.getFacturaPersonal())
+
 def verTodasFacturas():
     for persona in personas:
         factura = persona.getFacturaPersonal()
         verFactura(factura)
-    
+  
 ################ Articulo ################
 def altaArticulo():
     clear()
     setTittle(" CARGA DE ARTICULOS ", "=")
     nombreArticulo = str(input("Nombre: "))
-    #precio = float(input("Precio: $"))
-    precio = float(codNumRand(3))
-    #cantidad = int(input("Cantidad: "))
-    cantidad = int(codNumRand(1))
+    precio = float(input("Precio: $"))
+    #precio = float(codNumRand(3))
+    cantidad = int(input("Cantidad: "))
+    #cantidad = int(codNumRand(1))
 
     print("Que personas dividiran el gasto?")
     divisores = createList()
-    listaNombres = []
-    for persona in personas:
-        nombre = persona.getNombre()
-        listaNombres.append(nombre)
-    #nombre = Persona.getNomPersonas(personas)
-    print("Opciones:", listaNombres)
+    print("Opciones:", verNomPersonas(personas))
     nom = input("---> ")
     vec = nom.split(",")
     for persona in personas:    # itero lista personas
         for nomb in vec:        # itero los nombres del vector
             if nomb == persona.getNombre():
                 addToList(divisores, persona)
-    
     # Creo un articulo con nombre y personas asociadas
     articulo = Articulo(nombreArticulo, divisores)
     
@@ -128,7 +115,10 @@ def desasignarPersona():
     input()
 ################ Factura ################
 def verFactura(factura: Factura):
+    """Imprime en pantalla los datos de una factura"""
     clear()
+    totalFactura = 0
+    sumaMontoDividido = 0
     setTittle(" >>> GENERAR FACTURA >>> ", "=")
     print("Factura nro:", factura.getNumero(), "    Fecha:", factura.getFecha())
     print("Detalle:")
@@ -138,33 +128,60 @@ def verFactura(factura: Factura):
         for detalle in factura.getDetalles():           # itero la coleccion de detalles
             articulo = detalle.getArticulo()            # recupero un articulo
             subtotal = detalle.calcularSubTotal()       # subtotal del detalle
+            montoDividido = detalle.calcularSubTotalxPersona()
             print(" Articulo:", articulo.getNombre(),   
             "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
             "    Divisores:", articulo.getPersonas(),
             "    Subtotal: $", subtotal,
-            "    Cada uno paga: $", detalle.calcularSubTotalxPersona())   # imprimo los datos del articulo y del detalle.
+            "    Cada uno paga: $", montoDividido)   # imprimo los datos del articulo y del detalle.
+            totalFactura += subtotal
+            sumaMontoDividido += montoDividido
+        
+        print(">> Resumen:    Total: $", totalFactura, "   sumaMontoDividido: $", sumaMontoDividido)
     input()
 
-
+def calcular(factura: Factura):
+    if isEmpty(factura.getDetalles()):
+        print("Atencion! No se pueden realizar calculos sin datos.")
+    else:
+        for detalle in factura.getDetalles():
+            articulo = detalle.getArticulo()            # recupero un articulo
+            subtotal = detalle.calcularSubTotal()       # subtotal del detalle
+            montoDividido = detalle.calcularSubTotalxPersona()
 
 ########################################
 def menu():
+    """Menu principal"""
     clear()
     setTittle(" >>> MENU DE OPCIONES >>> ", "=")
     print("1) Alta Articulo.")
     print("2) Baja Articulo.")
     print("3) Desasignar persona de Articulo.")
     print("4) Ver factura.")
+    print("5) Ver facturas individuales.")
     print("5) Alta Persona.")
     print("6) Baja Persona.")
     print("0) Salir.")
     res = int(input("---> "))
-    return res
+    return res  
+
+def verNomPersonas(listaPersonas: list[Persona]) -> list[str]:
+    """Retorna una lista de nombres basada en la lista de objetos Persona"""
+    listaNombres = []
+    for persona in personas:
+        nombre = persona.getNombre()
+        listaNombres.append(nombre)
+    return listaNombres
+
 
 if __name__ == '__main__':
-    op = 1
+    op = 999
     while op!=0:
-        op = menu()
+        try:
+            op =  menu()
+        except Exception as ex:
+            print("\n>>>>> ERROR >>>>>", ex)
+            input()
         if op == 1:
             if isEmpty(personas):   # si la lista de personas esta vacia:
                 print("\nAtencion! No hay personas para asignarle a los articulos.")

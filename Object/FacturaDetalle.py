@@ -1,4 +1,4 @@
-from Object import Articulo, Persona
+from Object import Articulo
 
 
 class FacturaDetalle:
@@ -22,8 +22,6 @@ class FacturaDetalle:
         return self.cantidad
     def getPrecio(self) -> float:
         return self.precio
-    def getNomPersonas(self):
-        return Persona.getNomPersonas(self.articulo.getPersonas())
     def getPersonas(self):
         return self.articulo.getPersonas()
     def setArticulo(self, nArticulo: Articulo):
