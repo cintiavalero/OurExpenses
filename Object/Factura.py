@@ -33,9 +33,6 @@ class Factura:
             articulo = detalle.getArticulo().getNombre()
             listaArticulos.append(articulo)
         return listaArticulos
-
-
-    
     def setFecha(self, nFecha: datetime):
         self.fecha = nFecha
     def setNumero(self, nNumero: int):
@@ -48,3 +45,5 @@ class Factura:
         self.detalles.append(nDetalle)
     def delDetalle(self, rDetalle: FacturaDetalle):
         self.detalles.remove(rDetalle)
+    def delDetalles(self):
+        self.detalles.clear()

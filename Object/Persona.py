@@ -9,7 +9,7 @@ class Persona:
         texto = "{0}"
         return texto.format(self.nombre)
     def __repr__(self) -> str:
-        texto = "Nombre: {0}"
+        texto = "{0}"
         return texto.format(self.nombre)
 
     def getNombre(self) -> str:

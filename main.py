@@ -1,8 +1,10 @@
+
+import json
+from tabulate import tabulate
 from utilities import *
 from TAD_LISTA import *
 from Object import *
 #import pickel
-
 ########## ATRIBUTOS GLOBALES ##########
 FECHA=time.strftime("%d/%m/%Y", time.localtime())   # guardo la fecha actual
 tituloConsola("Dividir Gastos")                     # establezco titulo consola
@@ -41,9 +43,9 @@ def bajaPersona():
 def permutacion():
     #listaNombres=[persona.getNombre() for persona in personas]
     #[persona.getNombre() for persona in personas if (persona.getNombre() != 'Pedro')]
-    
     for persona in personas: #itero lista personas
         facturaPersonal = persona.getFacturaPersonal()
+        facturaPersonal.delDetalles()
         for detalle in factura.getDetalles(): # itero los detalles de la factura general
             listaNombres=[persona.getNombre() for persona in detalle.getArticulo().getPersonas()]
             for nomPersona in listaNombres:        #itero los nombres de los detalles
@@ -53,7 +55,7 @@ def permutacion():
 def verTodasFacturas():
     for persona in personas:
         factura = persona.getFacturaPersonal()
-        verFactura(factura)
+        verFactura(factura, persona.getNombre())
   
 ################ Articulo ################
 def altaArticulo():
@@ -69,17 +71,23 @@ def altaArticulo():
     divisores = createList()
     print("Opciones:", verNomPersonas(personas))
     nom = input("---> ")
-    vec = nom.split(",")
-    for persona in personas:    # itero lista personas
-        for nomb in vec:        # itero los nombres del vector
-            if nomb == persona.getNombre():
-                addToList(divisores, persona)
-    # Creo un articulo con nombre y personas asociadas
-    articulo = Articulo(nombreArticulo, divisores)
-    
-    # Creo un detalle con un articulo asociado
-    detalle = FacturaDetalle(articulo, cantidad, precio)
-    factura.addDetalle(detalle)
+    if nom == '':
+        for persona in personas:
+            addToList(divisores, persona)
+    else:
+        vec = nom.split(",")
+        for persona in personas:    # itero lista personas
+            for nomb in vec:        # itero los nombres del vector
+                if nomb == persona.getNombre():
+                    addToList(divisores, persona)
+    if isEmpty(divisores):
+        print("algo salio mal, intenta otra vez")
+    else:
+        # Creo un articulo con nombre y personas asociadas
+        articulo = Articulo(nombreArticulo, divisores)
+        # Creo un detalle con un articulo asociado
+        detalle = FacturaDetalle(articulo, cantidad, precio)
+        factura.addDetalle(detalle)
 
 def bajaArticulo():
     clear()
@@ -114,40 +122,61 @@ def desasignarPersona():
                     # tambien se puede negar la condicion del if y cargar una lista nueva que luego se carga al objeto.
     input()
 ################ Factura ################
-def verFactura(factura: Factura):
+def verFactura(factura: Factura, propietario: str):
     """Imprime en pantalla los datos de una factura"""
     clear()
     totalFactura = 0
     sumaMontoDividido = 0
     setTittle(" >>> GENERAR FACTURA >>> ", "=")
-    print("Factura nro:", factura.getNumero(), "    Fecha:", factura.getFecha())
-    print("Detalle:")
+    cabecera = ["Nro Factura","Propietario","Fecha"]
+    nro=int(factura.getNumero())
+    fecha=str(factura.getFecha())
+    fila=[nro,propietario,fecha]
+    contenido = [fila]
+    print(tabulate(contenido, headers=cabecera, tablefmt='psql'))
     if isEmpty(factura.getDetalles()):
         print("Atencion! Todavia no hay detalles cargados en la factura")
     else:
+        contenido = []
+
         for detalle in factura.getDetalles():           # itero la coleccion de detalles
+            fila = []
             articulo = detalle.getArticulo()            # recupero un articulo
             subtotal = detalle.calcularSubTotal()       # subtotal del detalle
             montoDividido = detalle.calcularSubTotalxPersona()
-            print(" Articulo:", articulo.getNombre(),   
-            "    Precio: $", detalle.getPrecio(), "    Cantidad:", detalle.getCantidad(),
-            "    Divisores:", articulo.getPersonas(),
-            "    Subtotal: $", subtotal,
-            "    Cada uno paga: $", montoDividido)   # imprimo los datos del articulo y del detalle.
+            nombreArticulo = articulo.getNombre()
+            precio = detalle.getPrecio()
+            cantidad = detalle.getCantidad()
+            divisores = verNomPersonas(articulo.getPersonas()) # retorna los nombres de las personas
+            
+            fila = {"nombre":nombreArticulo, "precio":precio, "cantidad":cantidad, "subtotal":subtotal, "divisores":divisores, "subtotal/div":montoDividido}
+            contenido.append(fila)
+
+           
+
             totalFactura += subtotal
             sumaMontoDividido += montoDividido
+            
+        print(tabulate(contenido, headers="keys", tablefmt='psql'))
+        #print(tabulate(contenido, headers=cabecera, tablefmt='psql'))
+        if propietario == "General":
+            print(">> Total: $", totalFactura)
+        else:
+            print(">> Total individual: $", sumaMontoDividido)
         
-        print(">> Resumen:    Total: $", totalFactura, "   sumaMontoDividido: $", sumaMontoDividido)
+        
+        datosFacturaCompleta = {
+            "nro": nro,
+            "Propietario": propietario,
+            "fecha": fecha,
+            "Detalles": contenido,
+            "Total": totalFactura,
+            "Total individual": sumaMontoDividido
+        }   
+        #print(datosFacturaCompleta)
+        
     input()
 
-def calcular(factura: Factura):
-    if isEmpty(factura.getDetalles()):
-        print("Atencion! No se pueden realizar calculos sin datos.")
-    else:
-        for detalle in factura.getDetalles():
-            articulo = detalle.getArticulo()            # recupero un articulo
-            subtotal = detalle.calcularSubTotal()       # subtotal del detalle
-            montoDividido = detalle.calcularSubTotalxPersona()
 
 ########################################
 def menu():
@@ -159,16 +188,19 @@ def menu():
     print("3) Desasignar persona de Articulo.")
     print("4) Ver factura.")
     print("5) Ver facturas individuales.")
-    print("5) Alta Persona.")
-    print("6) Baja Persona.")
+    print("6) Alta Persona.")
+    print("7) Baja Persona.")
     print("0) Salir.")
-    res = int(input("---> "))
-    return res  
+    try:
+        res = int(input("---> "))
+    except Exception as ex:
+        res = 999
+    return res
 
 def verNomPersonas(listaPersonas: list[Persona]) -> list[str]:
     """Retorna una lista de nombres basada en la lista de objetos Persona"""
     listaNombres = []
-    for persona in personas:
+    for persona in listaPersonas:
         nombre = persona.getNombre()
         listaNombres.append(nombre)
     return listaNombres
@@ -189,20 +221,36 @@ if __name__ == '__main__':
             else:                   # si la lista de personas no esta vacia:
                 altaArticulo()      # permito ingresar los articulos
         elif op == 2:
-            bajaArticulo()
+            if isEmpty(factura.getArticulos()):
+                print("\nAtencion! No hay articulos cargados para dar de baja.")
+                input()
+            else:
+                bajaArticulo()
         elif op == 3:
-            desasignarPersona()
+            if isEmpty(personas):
+                print("\nAtencion! No hay personas cargadas para desasignar.")
+                input()
+            elif isEmpty(factura.getArticulos()):
+                print("\nAtencion! No hay articulos cargados para desasignar una persona.")
+                input()
+            else:
+                desasignarPersona()
         elif op == 4:
-            verFactura(factura)
+            verFactura(factura, 'General')
         elif op == 5:
+            permutacion()
+            verTodasFacturas()
+        elif op == 6:
             clear()
             c = int(input("Cuantas personas va a ingresar?: "))
             altaPersona(c)
-        elif op == 6:
-            bajaPersona()
         elif op == 7:
-            permutacion()
-            verTodasFacturas()
+            if isEmpty(personas):
+                print("\nAtencion! No hay personas cargadas para dar de baja.")
+                input()
+            else:
+                bajaPersona()
+
         
 
 
